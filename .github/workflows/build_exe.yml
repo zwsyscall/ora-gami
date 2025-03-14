@@ -30,7 +30,7 @@ jobs:
           pyinstaller --onefile ora-gami.py
 
       - name: Upload EXE artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ora-gami-exe
           path: dist/ora-gami.exe

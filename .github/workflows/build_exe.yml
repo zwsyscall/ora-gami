@@ -3,8 +3,6 @@ name: Build EXE
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   build:
@@ -30,7 +28,7 @@ jobs:
           pyinstaller --onefile ora-gami.py
 
       - name: Upload EXE artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ora-gami-exe
           path: dist/ora-gami.exe

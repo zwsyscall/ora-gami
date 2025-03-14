@@ -74,7 +74,8 @@ def parse_stack_file(file_path: str, verbosity: bool):
     vprint(verbosity, f"[+] Parsing XML file {file_path}")
     xml_handle = open(file_path, "r")
 
-    return xmltodict.parse(xml_handle.read())
+    with open(file_path, "r", encoding="utf-8") as xml_handle:
+        return xmltodict.parse(xml_handle.read())
 
 def parse_file(file_path, destination_path, verbosity, translator, src_lang, dest_lang):
     if not os.path.isfile(file_path):

@@ -77,6 +77,8 @@ def parse_stack_file(file_path: str, verbosity: bool):
     with open(file_path, "r", encoding="utf-8") as xml_handle:
         return xmltodict.parse(xml_handle.read())
 
+
+
 def parse_file(file_path, destination_path, verbosity, translator, src_lang, dest_lang):
     if not os.path.isfile(file_path):
         raise FileNotFoundError("Passed ora file does not exist!")
@@ -93,14 +95,38 @@ def parse_file(file_path, destination_path, verbosity, translator, src_lang, des
         vprint(verbosity, f"[+] Creating output folder {destination_path}")
         os.makedirs(destination_path, exist_ok=True)
 
+    # I feel like this will cause issues later on but whatever
         try:
             threads = []
-            for layer in stack_dictionary["image"]["stack"]["layer"]:
-                thread = threading.Thread(target=move_file, args=(layer, temp_path, destination_path, translator, src_lang, dest_lang))
-                thread.start()
-                threads.append(thread)
-        except:
+            def process_stack(item):
+                if isinstance(item, dict):
+                    if "layer" in item:
+                        layers = item["layer"]
+                        if isinstance(layers, list):
+                            for layer in layers:
+                                thread = threading.Thread(
+                                    target=move_file, 
+                                    args=(layer, temp_path, destination_path, translator, src_lang, dest_lang)
+                                )
+                                thread.start()
+                                threads.append(thread)
+                        else:
+                            thread = threading.Thread(
+                                target=move_file, 
+                                args=(layers, temp_path, destination_path, translator, src_lang, dest_lang)
+                            )
+                            thread.start()
+                            threads.append(thread)
+                    if "stack" in item:
+                        process_stack(item["stack"])
+                elif isinstance(item, list):
+                    for sub_item in item:
+                        process_stack(sub_item)
+            process_stack(stack_dictionary["image"]["stack"])
+
+        except Exception:
             raise ValueError("Incorrect stack file configuration. Please check the passed ora file.")
+
 
         for thread in threads:
             thread.join()
